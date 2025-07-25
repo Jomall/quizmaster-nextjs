@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  role          Role      @default(STUDENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  quizzes       Quiz[]
+  quizAttempts  QuizAttempt[]
+  contentItems  ContentItem[]
+}
+
+model Quiz {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  timeLimit   Int
+  teacherId   String
+  teacher     User      @relation(fields: [teacherId], references: [id])
+  questions   Question[]
+  attempts    QuizAttempt[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Question {
+  id            String    @id @default(cuid())
+  quizId        String
+  quiz          Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  questionText  String
+  questionType  QuestionType
+  options       String[]
+  correctAnswer String
+  points        Int
+  order         Int
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model QuizAttempt {
+  id          String    @id @default(cuid())
+  quizId      String
+  quiz        Quiz      @relation(fields: [quizId], references: [id])
+  studentId   String
+  student     User      @relation(fields: [studentId], references: [id])
+  score       Int?
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  answers     QuizAnswer[]
+}
+
+model QuizAnswer {
+  id          String    @id @default(cuid())
+  attemptId   String
+  attempt     QuizAttempt @relation(fields: [attemptId], references: [id])
+  questionId  String
+  answer      String
+  isCorrect   Boolean
+  points      Int
+  createdAt   DateTime  @default(now())
+}
+
+model ContentItem {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  type        ContentType
+  url         String
+  teacherId   String
+  teacher     User      @relation(fields: [teacherId], references: [id])
+  subject     String
+  uploadDate  DateTime  @default(now())
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+enum ContentType {
+  NOTE
+  VIDEO
+  LINK
+}
