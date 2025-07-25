@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db } from '../../../lib/db'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions } from '../../../lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const subject = searchParams.get('subject')
     const teacherId = searchParams.get('teacherId')
 
-    let whereClause: any = { isActive: true }
+    const whereClause: { isActive: boolean; subject?: string; teacherId?: string } = { isActive: true }
 
     if (subject) {
       whereClause.subject = subject

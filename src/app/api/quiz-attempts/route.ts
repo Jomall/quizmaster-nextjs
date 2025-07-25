@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db } from '../../../lib/db'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions } from '../../../lib/auth'
+
+interface QuizAnswer {
+  questionId: string
+  answer: string
+}
+
+interface QuizQuestion {
+  id: string
+  correctAnswer: string
+  points: number
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,7 +32,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const quizId = searchParams.get('quizId')
 
-    let whereClause: any = {}
+    const whereClause: { studentId?: string; quizId?: string } = {}
     
     if (user.role === 'STUDENT') {
       whereClause.studentId = user.id
@@ -38,13 +49,7 @@ export async function GET(request: NextRequest) {
         student: {
           select: { name: true, email: true }
         },
-        answers: {
-          include: {
-            question: {
-              select: { questionText: true, points: true }
-            }
-          }
-        }
+        answers: true
       },
       orderBy: { startedAt: 'desc' }
     })
@@ -86,8 +91,8 @@ export async function POST(request: NextRequest) {
 
     // Calculate score
     let totalScore = 0
-    const quizAnswers = answers.map((answer: any) => {
-      const question = quiz.questions.find((q: any) => q.id === answer.questionId)
+    const quizAnswers = answers.map((answer: QuizAnswer) => {
+      const question = quiz.questions.find((q: QuizQuestion) => q.id === answer.questionId)
       if (!question) return null
 
       const isCorrect = answer.answer === question.correctAnswer
@@ -117,13 +122,7 @@ export async function POST(request: NextRequest) {
         quiz: {
           select: { title: true }
         },
-        answers: {
-          include: {
-            question: {
-              select: { questionText: true, correctAnswer: true, points: true }
-            }
-          }
-        }
+        answers: true
       }
     })
 

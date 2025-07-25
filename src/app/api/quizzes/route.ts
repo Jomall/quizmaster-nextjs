@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db } from '../../../lib/db'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions } from '../../../lib/auth'
 
-export async function GET(request: NextRequest) {
+interface QuizQuestion {
+  questionText: string
+  questionType: string
+  options?: string[]
+  correctAnswer: string
+  points: number
+}
+
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
@@ -65,7 +73,7 @@ export async function POST(request: NextRequest) {
         timeLimit,
         teacherId: user.id,
         questions: {
-          create: questions.map((q: any, index: number) => ({
+          create: questions.map((q: QuizQuestion, index: number) => ({
             questionText: q.questionText,
             questionType: q.questionType,
             options: q.options || [],

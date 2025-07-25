@@ -119,8 +119,8 @@ export default function SignIn() {
             <div className="text-gray-600 mb-2">Demo Credentials:</div>
             <div className="text-xs space-y-1">
               <div>
-                <strong>Student:</strong>{" "}
-                <span>student1@school.edu / student123</span>
+              <strong>Student:</strong>{" "}
+              <span>student1@school.edu / student123</span>
               </div>
               <div>
                 <strong>Teacher:</strong>{" "}
